@@ -39,6 +39,7 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	// How to use
 	sendResultsToReportServer(L"{Som data in json format}", L"http:\\localhost:9000");
+	std::system("Pause");
 	return 0;
 }
 
