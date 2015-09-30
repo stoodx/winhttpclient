@@ -29,7 +29,7 @@ public:
     inline ~WinHttpClient(void);
 
     // It is a synchronized method and may take a long time to finish.
-    inline bool SendHttpRequest(const wstring &httpVerb = L"GET", bool disableAutoRedirect = false);
+    inline bool SendHttpRequest(const wstring &httpVerb = L"GET", bool disableAutoRedirect = false, bool securityConnection = false);
     inline wstring GetResponseHeader(void);
     inline wstring GetResponseContent(void);
     inline wstring GetResponseCharset(void);
@@ -141,7 +141,7 @@ WinHttpClient::~WinHttpClient(void)
     }
 }
 
-bool WinHttpClient::SendHttpRequest(const wstring &httpVerb, bool disableAutoRedirect)
+bool WinHttpClient::SendHttpRequest(const wstring &httpVerb, bool disableAutoRedirect, bool securityConnection)
 {
     if (m_requestURL.size() <= 0)
     {
@@ -195,6 +195,11 @@ bool WinHttpClient::SendHttpRequest(const wstring &httpVerb, bool disableAutoRed
     urlComp.lpszUrlPath = szURLPath;
     urlComp.dwUrlPathLength = MAX_PATH * 5;
     urlComp.dwSchemeLength = 1; // None zero
+	if (securityConnection)
+	{
+		urlComp.nScheme = INTERNET_SCHEME_HTTPS;
+		SetRequireValidSslCertificates(true);
+	}
 
     if (::WinHttpCrackUrl(m_requestURL.c_str(), m_requestURL.size(), 0, &urlComp))
     {
