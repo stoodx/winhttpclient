@@ -45,14 +45,19 @@ bool sendResultsToReportServer(std::tstring strJsonResults, std::tstring serverU
 int _tmain(int argc, _TCHAR* argv[])
 {
 	// How to use
-	sendResultsToReportServer(L"{Som data in json format}", L"http://localhost:9000", false);
-	//from https://developers.google.com/chart/image/docs/post_requests
-     std::wstring  strReq = L"<input type=\"hidden\" name=\"cht\" value=\"lc\"  /><input type=\"hidden\" name=\"chtt\" value=\"This is | my chart\"  />";
-	strReq += L"<input type='hidden' name='chs' value='300x200' /><input type=\"hidden\" name=\"chxt\" value=\"x\" /><input type='hidden' name='chd' value='t:40,20,50,20,100'/>";
-    strReq += L"<input type=\"submit\"  />";
-	sendResultsToReportServer(strReq, L"https://chart.googleapis.com/chart", true);
+	sendResultsToReportServer(L"{Som data in json format by HTTP}", L"http://localhost:9000", false);
 
-	std::system("Pause");
+	sendResultsToReportServer(L"{Som data in json format by HTTPS}", L"https://localhost:9001", true);
+
+	//from https://developers.google.com/chart/image/docs/post_requests
+ //    std::wstring  strReq = L"<input type=\"hidden\" name=\"cht\" value=\"lc\"  /><input type=\"hidden\" name=\"chtt\" value=\"This is | my chart\"  />";
+	//strReq += L"<input type='hidden' name='chs' value='300x200' /><input type=\"hidden\" name=\"chxt\" value=\"x\" /><input type='hidden' name='chd' value='t:40,20,50,20,100'/>";
+ //   strReq += L"<input type=\"submit\"  />";
+	//sendResultsToReportServer(strReq, L"https://chart.googleapis.com/chart", true);
+
+	sendResultsToReportServer(L"{TestProba HTTPS}", L"https://192.168.82.148:9001", true);
+
+//	std::system("Pause");
 	return 0;
 }
 

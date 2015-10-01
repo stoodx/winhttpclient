@@ -57,6 +57,7 @@ public:
                             unsigned int connectTimeout = 60000,
                             unsigned int sendTimeout = 30000,
                             unsigned int receiveTimeout = 30000);
+	void SetStatusCodeStr(const wstring &strCode);
 
 private:
     inline WinHttpClient(const WinHttpClient &other);
@@ -141,6 +142,60 @@ WinHttpClient::~WinHttpClient(void)
     }
 }
 
+void WinHttpClient::SetStatusCodeStr(const wstring &strCode)
+{
+	m_statusCode = strCode;
+}
+
+void  CALLBACK SecurityStatusCallback(HINTERNET hInternet,
+											  DWORD_PTR dwContext,
+											  DWORD     dwInternetStatus,
+											  LPVOID    lpvStatusInformation,
+											  DWORD     dwStatusInformationLength)
+{
+	if (dwInternetStatus != WINHTTP_CALLBACK_STATUS_SECURE_FAILURE)
+		 return;
+	WinHttpClient* pCtx = (WinHttpClient*) dwContext;
+	if (pCtx == NULL)
+		return;
+	DWORD dwStatus =  *((DWORD*)lpvStatusInformation);  
+	switch (dwStatus) 
+	{
+        case WINHTTP_CALLBACK_STATUS_FLAG_CERT_REV_FAILED:
+			pCtx->SetStatusCodeStr(L"CERT_REV_FAILED");
+            break;
+
+        case WINHTTP_CALLBACK_STATUS_FLAG_INVALID_CERT:
+            pCtx->SetStatusCodeStr(L"INVALID_CERT");
+            break;
+
+        case WINHTTP_CALLBACK_STATUS_FLAG_CERT_REVOKED:
+            pCtx->SetStatusCodeStr(L"CERT_REVOKED");
+            break;
+
+        case WINHTTP_CALLBACK_STATUS_FLAG_INVALID_CA:
+            pCtx->SetStatusCodeStr(L"INVALID_CA");
+            break;
+
+        case WINHTTP_CALLBACK_STATUS_FLAG_CERT_CN_INVALID:
+            pCtx->SetStatusCodeStr(L"CERT_CN_INVALID");
+            break;
+
+        case WINHTTP_CALLBACK_STATUS_FLAG_CERT_DATE_INVALID:
+            pCtx->SetStatusCodeStr(L"CERT_DATE_INVALID");
+            break;
+
+        case WINHTTP_CALLBACK_STATUS_FLAG_SECURITY_CHANNEL_ERROR:
+            pCtx->SetStatusCodeStr(L"SECURITY_CHANNEL_ERROR");
+            break;
+
+        default:
+			pCtx->SetStatusCodeStr(L"Unknown error");
+            break;
+    }
+
+}
+
 bool WinHttpClient::SendHttpRequest(const wstring &httpVerb, bool disableAutoRedirect, bool securityConnection)
 {
     if (m_requestURL.size() <= 0)
@@ -179,6 +234,13 @@ bool WinHttpClient::SendHttpRequest(const wstring &httpVerb, bool disableAutoRed
         }
     }
 
+	if (securityConnection)
+	{
+		::WinHttpSetStatusCallback( m_sessionHandle,
+                                    (WINHTTP_STATUS_CALLBACK)SecurityStatusCallback,
+                                     WINHTTP_CALLBACK_STATUS_SECURE_FAILURE, 
+                                     NULL);
+	}
     ::WinHttpSetTimeouts(m_sessionHandle,
                          m_resolveTimeout,
                          m_connectTimeout,
@@ -198,7 +260,7 @@ bool WinHttpClient::SendHttpRequest(const wstring &httpVerb, bool disableAutoRed
 	if (securityConnection)
 	{
 		urlComp.nScheme = INTERNET_SCHEME_HTTPS;
-		SetRequireValidSslCertificates(true);
+//		SetRequireValidSslCertificates(true);
 	}
 
     if (::WinHttpCrackUrl(m_requestURL.c_str(), m_requestURL.size(), 0, &urlComp))
@@ -299,7 +361,7 @@ bool WinHttpClient::SendHttpRequest(const wstring &httpVerb, bool disableAutoRed
                                              WINHTTP_NO_REQUEST_DATA,
                                              0,
                                              0,
-                                             NULL))
+                                             (DWORD_PTR)this))
                     {
                         bSendRequestSucceed = true;
                     }
