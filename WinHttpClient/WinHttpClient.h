@@ -58,6 +58,7 @@ public:
                             unsigned int sendTimeout = 30000,
                             unsigned int receiveTimeout = 30000);
 	void SetStatusCodeStr(const wstring &strCode);
+	wstring GetStatusCode();
 
 private:
     inline WinHttpClient(const WinHttpClient &other);
@@ -147,6 +148,11 @@ void WinHttpClient::SetStatusCodeStr(const wstring &strCode)
 	m_statusCode = strCode;
 }
 
+wstring WinHttpClient::GetStatusCode()
+{
+	return m_statusCode;
+}
+
 void  CALLBACK SecurityStatusCallback(HINTERNET hInternet,
 											  DWORD_PTR dwContext,
 											  DWORD     dwInternetStatus,
@@ -190,7 +196,9 @@ void  CALLBACK SecurityStatusCallback(HINTERNET hInternet,
             break;
 
         default:
-			pCtx->SetStatusCodeStr(L"Unknown error");
+			TCHAR strErr[MAX_PATH] = {0};
+			_stprintf_s(strErr, MAX_PATH, L"Unknown error - %d(0x%X)", dwStatus, dwStatus);
+			pCtx->SetStatusCodeStr(strErr);
             break;
     }
 
@@ -234,13 +242,6 @@ bool WinHttpClient::SendHttpRequest(const wstring &httpVerb, bool disableAutoRed
         }
     }
 
-	if (securityConnection)
-	{
-		::WinHttpSetStatusCallback( m_sessionHandle,
-                                    (WINHTTP_STATUS_CALLBACK)SecurityStatusCallback,
-                                     WINHTTP_CALLBACK_STATUS_SECURE_FAILURE, 
-                                     NULL);
-	}
     ::WinHttpSetTimeouts(m_sessionHandle,
                          m_resolveTimeout,
                          m_connectTimeout,
@@ -260,7 +261,11 @@ bool WinHttpClient::SendHttpRequest(const wstring &httpVerb, bool disableAutoRed
 	if (securityConnection)
 	{
 		urlComp.nScheme = INTERNET_SCHEME_HTTPS;
-//		SetRequireValidSslCertificates(true);
+	//	SetRequireValidSslCertificates(true);
+		::WinHttpSetStatusCallback( m_sessionHandle,
+                                    (WINHTTP_STATUS_CALLBACK)SecurityStatusCallback,
+                                     WINHTTP_CALLBACK_STATUS_SECURE_FAILURE, 
+                                     NULL);
 	}
 
     if (::WinHttpCrackUrl(m_requestURL.c_str(), m_requestURL.size(), 0, &urlComp))

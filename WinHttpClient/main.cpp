@@ -23,7 +23,7 @@ bool sendResultsToReportServer(std::tstring strJsonResults, std::tstring serverU
 	// Send http post request.
 	if ( !request.SendHttpRequest(L"POST", false, securityConnection))
 	{
-		std::cout << "fail request.SendHttpRequest(L\"POST\")" << std::endl;
+		std::wcout << L"fail request.SendHttpRequest(L\"POST\") - " << request.GetStatusCode()<< std::endl;
 		return false;
 	}
 
@@ -45,17 +45,16 @@ bool sendResultsToReportServer(std::tstring strJsonResults, std::tstring serverU
 int _tmain(int argc, _TCHAR* argv[])
 {
 	// How to use
-	sendResultsToReportServer(L"{Som data in json format by HTTP}", L"http://localhost:9000", false);
+	sendResultsToReportServer(L"{Some data in json format by HTTP}", L"http://localhost:9000", false);
 
-	sendResultsToReportServer(L"{Som data in json format by HTTPS}", L"https://localhost:9001", true);
+	sendResultsToReportServer(L"{Some data in json format by HTTPS}", L"https://localhost:9001", true);
 
-	//from https://developers.google.com/chart/image/docs/post_requests
- //    std::wstring  strReq = L"<input type=\"hidden\" name=\"cht\" value=\"lc\"  /><input type=\"hidden\" name=\"chtt\" value=\"This is | my chart\"  />";
-	//strReq += L"<input type='hidden' name='chs' value='300x200' /><input type=\"hidden\" name=\"chxt\" value=\"x\" /><input type='hidden' name='chd' value='t:40,20,50,20,100'/>";
- //   strReq += L"<input type=\"submit\"  />";
-	//sendResultsToReportServer(strReq, L"https://chart.googleapis.com/chart", true);
+//	from https://developers.google.com/chart/image/docs/post_requests
+    std::wstring  strReq = L"Test Google";
+	sendResultsToReportServer(strReq, L"https://chart.googleapis.com/chart", true); //response 400 error is normal
 
-	sendResultsToReportServer(L"{TestProba HTTPS}", L"https://192.168.82.148:9001", true);
+	sendResultsToReportServer(L"{TestProba HTTP}", L"http://192.168.82.148:9000", false);
+	sendResultsToReportServer(L"{TestProba HTTPS}", L"https://192.168.82.148", true); //default 443 port - WireShark sees TLS packets  only from 443 port
 
 //	std::system("Pause");
 	return 0;
