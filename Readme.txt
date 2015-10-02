@@ -6,3 +6,5 @@ securityConnection = true;
 
 If HTTPS server has self-signed certificate,  call SetRequireValidSslCertificates() with 'false', 
 for a normal certificate it can be  'true' or 'false'.
+
+Use GetStatusCode() for check of connect by HTTPS.
