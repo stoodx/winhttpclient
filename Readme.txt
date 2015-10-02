@@ -4,5 +4,5 @@ inline bool SendHttpRequest(const wstring &httpVerb = L"GET", bool disableAutoRe
 
 securityConnection = true;
 
-If HTTPS server has self-signed certificate,  call SetRequireValidSslCertificates(false), 
-for a normal certificate must be  SetRequireValidSslCertificates(true).
+If HTTPS server has self-signed certificate,  call SetRequireValidSslCertificates() with 'false', 
+for a normal certificate it can be  'true' or 'false'.
